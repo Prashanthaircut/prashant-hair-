@@ -2,53 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prashant Hair Salon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prashant Hair Salon | Official</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --gold: #d4af37; --dark: #0a0a0a; }
-        body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; text-align: center; }
-        #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; font-size: 14px; }
-        .status-open { background: #28a745; color: white; }
-        .status-closed { background: #e74c3c; color: white; }
-        #noticeBar { display:none; background: #222; color:var(--gold); padding:12px; position:sticky; top:0; z-index:1000; border-bottom: 1px solid var(--gold); }
-        .notice-content { display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .bell-icon { font-size: 20px; animation: ring 2s infinite; }
-        @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(15deg);} 20% {transform: rotate(-15deg);} 30% {transform: rotate(0);} }
-        header { padding: 30px 15px; background: #000; border-bottom: 2px solid var(--gold); }
-        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-        .gallery-item { background: rgba(30,30,30,0.8); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .gallery-item img { width: 100%; height: 140px; object-fit: cover; }
-        .card { background: rgba(30,30,30,0.9); padding: 20px; margin: 15px; border-radius: 12px; border: 1px solid var(--gold); }
-        input, textarea { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid #444; box-sizing: border-box; }
-        .btn-gold { background: var(--gold); color: black; padding: 12px; border: none; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        footer { padding: 30px; border-top: 1px solid #222; margin-top: 20px; }
-        .social-links a { color: var(--gold); font-size: 24px; margin: 0 15px; text-decoration: none; }
+        :root { --gold: #d4af37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.08); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; user-select: none; }
+
+        #noticeBar { display:none; background: var(--gold); color: #000; padding: 12px; font-weight: bold; position: sticky; top:0; z-index: 1000; text-align: center; }
+        .bell { animation: ring 1.5s infinite; margin-right: 8px; }
+        @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(20deg);} 20% {transform: rotate(-20deg);} 30% {transform: rotate(0);} }
+
+        #shopStatusDisplay { display: none; padding: 10px; font-size: 13px; font-weight: bold; text-align: center; }
+        .open { background: #28a745; }
+        .closed { background: #e74c3c; }
+
+        header { padding: 40px 20px; text-align: center; background: #000; border-bottom: 2px solid var(--gold); }
+        
+        /* Gallery Click Fix */
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .gallery-item { background: #161616; border-radius: 12px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
+        .gallery-item:active { transform: scale(0.95); }
+        .gallery-item img { width: 100%; height: 140px; object-fit: cover; pointer-events: none; }
+
+        .card { background: var(--glass); backdrop-filter: blur(10px); padding: 25px; margin: 15px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #111; color: #fff; border: 1px solid #333; box-sizing: border-box; }
+        .btn-gold { background: var(--gold); color: #000; padding: 15px; border: none; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+
+        /* Full Screen Image Modal */
+        #imgModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+        #imgModal img { max-width: 90%; max-height: 80%; border-radius: 10px; border: 2px solid var(--gold); }
+
+        footer { padding: 30px 20px; text-align: center; border-top: 1px solid #222; }
+        .social-links a { color: var(--gold); font-size: 26px; margin: 0 15px; text-decoration: none; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
+<div id="noticeBar"><i class="fas fa-bell bell"></i><span id="noticeText"></span></div>
 <div id="shopStatusDisplay"></div>
-<div id="noticeBar"><div class="notice-content"><i class="fas fa-bell bell-icon"></i><span id="noticeText"></span></div></div>
 
-<header><h1>PRASHANT <span style="color:var(--gold)">HAIR SALON</span></h1></header>
+<header><h1>PRASHANT <span style="color:var(--gold)">SALON</span></h1></header>
 
 <div id="galleryDisplay" class="gallery-grid"></div>
 
+<div id="imgModal" onclick="this.style.display='none'">
+    <img id="fullImg" src="">
+    <p style="position:absolute; bottom:20px; color:var(--gold);">Tap anywhere to close</p>
+</div>
+
 <div class="card">
-    <h2 style="color:var(--gold);">BOOK YOUR SLOT</h2>
+    <h3 style="color:var(--gold); margin-top:0; text-align:center;">BOOK APPOINTMENT</h3>
     <input type="text" id="cName" placeholder="Aapka Naam">
-    <input type="tel" id="cPhone" placeholder="Mobile Number">
+    <input type="tel" id="cPhone" placeholder="Mobile Number (10 Digits)">
     <input type="datetime-local" id="cTime">
-    <textarea id="cNote" placeholder="Style details..."></textarea>
-    <button class="btn-gold" onclick="submitBooking()">Confirm Booking</button>
+    <textarea id="cNote" placeholder="Style details..." rows="2"></textarea>
+    <button class="btn-gold" onclick="secureBooking()">Confirm Booking</button>
 </div>
 
 <footer>
     <div class="social-links" id="socialFooter"></div>
-    <p style="font-size: 12px; color: #666; margin-top: 15px;">© 2026 Prashant Hair Salon</p>
+    <p style="font-size: 11px; color: #555; margin-top: 20px;">PRASHANT HAIR SALON © 2026</p>
 </footer>
 
 <script>
@@ -57,31 +75,43 @@
     const db = firebase.database();
 
     function loadData() {
+        // Load Status
         db.ref('shopStatus').on('value', snap => {
-            const status = snap.val() || "Open";
+            const s = snap.val() || "Open";
             const el = document.getElementById('shopStatusDisplay');
             el.style.display = 'block';
-            el.innerText = status === "Open" ? "● SHOP IS OPEN" : "● SHOP IS CLOSED";
-            el.className = status === "Open" ? "status-open" : "status-closed";
+            el.innerText = s === "Open" ? "● SHOP IS OPEN" : "● SHOP IS CLOSED";
+            el.className = s === "Open" ? "open" : "closed";
         });
 
+        // Load Notice
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
-            if(msg) { bar.style.display = 'block'; document.getElementById('noticeText').innerText = msg; }
-            else { bar.style.display = 'none'; }
+            if(msg && msg.trim() !== "") { 
+                bar.style.display = 'block'; 
+                document.getElementById('noticeText').innerText = msg; 
+            } else { bar.style.display = 'none'; }
         });
 
+        // Load Gallery with Click Fix
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
             for (let id in data) {
-                div.innerHTML += `<div class="gallery-item"><img src="${data[id].url}"><div style="padding:8px; font-size:12px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
+                div.innerHTML += `
+                <div class="gallery-item" onclick="openImg('${data[id].url}')">
+                    <img src="${data[id].url}">
+                    <div style="padding:10px; font-size:12px;">
+                        <b>${data[id].title}</b><br>
+                        <span style="color:var(--gold)">₹${data[id].price}</span>
+                    </div>
+                </div>`;
             }
         });
 
-        // SOCIAL MEDIA LINKS LOAD
+        // Load Social
         db.ref('social').on('value', snap => {
             const s = snap.val();
             if(s) {
@@ -93,17 +123,27 @@
         });
     }
 
-    function submitBooking() {
-        const name = document.getElementById('cName').value;
-        const phone = document.getElementById('cPhone').value;
+    // Photo Click Function
+    function openImg(url) {
+        document.getElementById('fullImg').src = url;
+        document.getElementById('imgModal').style.display = 'flex';
+    }
+
+    function secureBooking() {
+        const name = document.getElementById('cName').value.trim();
+        const phone = document.getElementById('cPhone').value.trim();
         const time = document.getElementById('cTime').value;
-        const note = document.getElementById('cNote').value;
-        if (name && phone && time) {
-            db.ref('bookings').push({ name, phone, time, note }).then(() => {
-                alert("✅ Booking Done!");
-                window.location.replace(window.location.href.split('?')[0]);
-            });
-        } else { alert("Details Fill Karo!"); }
+        if(name.length < 3 || phone.length !== 10 || !time) { 
+            alert("Please fill name, 10-digit phone and time!"); 
+            return; 
+        }
+
+        db.ref('bookings').push({
+            name, phone, time, note: document.getElementById('cNote').value, submittedAt: Date.now()
+        }).then(() => {
+            alert("✅ Booking Done!");
+            window.location.replace(window.location.origin + window.location.pathname + "?v=" + Date.now());
+        });
     }
     window.onload = loadData;
 </script>
