@@ -4,48 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prashant Hair Salon</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gold: #d4af37; --dark: #0a0a0a; }
         body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; text-align: center; }
         
-        /* NAVU: Shop Status Bar */
-        #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; font-size: 16px; border-bottom: 2px solid #000; }
+        /* 1. Shop Status Bar */
+        #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; font-size: 14px; }
         .status-open { background: #28a745; color: white; }
         .status-closed { background: #e74c3c; color: white; }
 
-        /* Notification Bar */
-        #noticeBar { display:none; background:var(--gold); color:black; padding:8px; font-weight:bold; position:sticky; top:0; z-index:1000; border-bottom:2px solid #000; }
-        
-        header { padding: 40px 15px; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=500'); background-size: cover; border-bottom: 2px solid var(--gold); }
-        header h1 { font-size: 1.8em; margin: 0; letter-spacing: 2px; }
+        /* 2. Notification ICON Bar */
+        #noticeBar { display:none; background: #222; color:var(--gold); padding:12px; position:sticky; top:0; z-index:1000; border-bottom:1px solid var(--gold); }
+        .notice-content { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .bell-icon { font-size: 20px; animation: ring 2s infinite; }
+        @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(15deg);} 20% {transform: rotate(-15deg);} 30% {transform: rotate(0);} }
+
+        header { padding: 30px 15px; background: #000; border-bottom: 2px solid var(--gold); }
+        header h1 { font-size: 1.6em; margin: 0; letter-spacing: 2px; }
 
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         .gallery-item { background: rgba(30,30,30,0.8); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .gallery-item img { width: 100%; height: 140px; object-fit: cover; cursor: pointer; }
+        .gallery-item img { width: 100%; height: 140px; object-fit: cover; }
 
-        /* Zoom Modal */
         #photoModal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
         #modalImg { max-width: 90%; max-height: 80%; border: 2px solid var(--gold); border-radius: 10px; }
 
         .card { background: rgba(30,30,30,0.9); padding: 20px; margin: 15px; border-radius: 12px; border: 1px solid var(--gold); }
         input, textarea { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid #444; box-sizing: border-box; }
-        .btn-gold { background: var(--gold); color: black; padding: 12px; border: none; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
-        footer { padding: 20px; border-top: 1px solid #222; margin-top: 20px; }
-        .social-links a { color: var(--gold); font-size: 22px; margin: 0 10px; text-decoration: none; }
+        .btn-gold { background: var(--gold); color: black; padding: 12px; border: none; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="shopStatusDisplay"></div>
 
-<div id="noticeBar"><marquee id="noticeText"></marquee></div>
+<div id="noticeBar">
+    <div class="notice-content">
+        <i class="fas fa-bell bell-icon"></i>
+        <span id="noticeText" style="font-size: 14px; font-weight: bold;"></span>
+    </div>
+</div>
 
 <header>
     <h1>PRASHANT <span style="color:var(--gold)">HAIR SALON</span></h1>
-    <p style="margin:5px 0 0 0; color:#ccc; font-size:14px;">Premium Style Studio</p>
 </header>
 
 <div id="photoModal" onclick="this.style.display='none'">
@@ -63,88 +67,58 @@
     <button class="btn-gold" onclick="submitBooking()">Confirm Booking</button>
 </div>
 
-<footer>
-    <div class="social-links" id="socialFooter"></div>
-</footer>
-
 <script>
-    // Tamari Database URL sathe connectivity
     const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function loadData() {
-        // 1. Shop Status Load (Navu Feature)
+        // Shop Status
         db.ref('shopStatus').on('value', snap => {
             const status = snap.val() || "Open";
             const el = document.getElementById('shopStatusDisplay');
             el.style.display = 'block';
             if(status === "Open") {
-                el.innerText = "● SHOP IS OPEN TODAY";
+                el.innerText = "● SHOP IS OPEN";
                 el.className = "status-open";
             } else {
-                el.innerText = "● SHOP IS CLOSED NOW";
+                el.innerText = "● SHOP IS CLOSED";
                 el.className = "status-closed";
             }
         });
 
-        // 2. Announcement Load
+        // Notification with Icon
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
-            if(msg) { bar.style.display = 'block'; document.getElementById('noticeText').innerText = msg; }
-            else { bar.style.display = 'none'; }
+            if(msg) { 
+                bar.style.display = 'block'; 
+                document.getElementById('noticeText').innerText = msg; 
+            } else { 
+                bar.style.display = 'none'; 
+            }
         });
 
-        // 3. Photos Load with Price & Title
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
             for (let id in data) {
-                div.innerHTML += `
-                    <div class="gallery-item">
-                        <img src="${data[id].url}" onclick="showImg('${data[id].url}')">
-                        <div style="padding:8px; font-size:13px;">
-                            <b>${data[id].title}</b><br>
-                            <span style="color:var(--gold)">₹${data[id].price}</span>
-                        </div>
-                    </div>`;
-            }
-        });
-
-        // 4. Social Links Load
-        db.ref('social').on('value', snap => {
-            const s = snap.val();
-            if(s) {
-                document.getElementById('socialFooter').innerHTML = `
-                    <a href="${s.tg}" target="_blank"><i class="fab fa-telegram"></i></a>
-                    <a href="${s.ig}" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://wa.me/${s.wa}" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+                div.innerHTML += `<div class="gallery-item"><img src="${data[id].url}" onclick="showImg('${data[id].url}')"><div style="padding:8px; font-size:12px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
             }
         });
     }
 
-    // Zoom Image Function
-    function showImg(url) { 
-        document.getElementById('modalImg').src = url; 
-        document.getElementById('photoModal').style.display = 'flex'; 
-    }
-
-    // Submit Booking
+    function showImg(url) { document.getElementById('modalImg').src = url; document.getElementById('photoModal').style.display = 'flex'; }
     function submitBooking() {
         const name = document.getElementById('cName').value;
         const phone = document.getElementById('cPhone').value;
         const time = document.getElementById('cTime').value;
         const note = document.getElementById('cNote').value;
         if (name && phone && time) {
-            db.ref('bookings').push({ name, phone, time, note }).then(() => {
-                alert("Booking Successful!");
-                location.reload();
-            });
-        } else { alert("Aapka Naam, Phone aur Time bhariye!"); }
+            db.ref('bookings').push({ name, phone, time, note }).then(() => { alert("Booking Done!"); location.reload(); });
+        } else { alert("Details fill karein!"); }
     }
-    
     window.onload = loadData;
 </script>
 </body>
