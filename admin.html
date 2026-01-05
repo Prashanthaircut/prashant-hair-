@@ -57,16 +57,18 @@
     </div>
 
     <script>
+        // Database Configuration
         const firebaseConfig = { 
             databaseURL: "https://prashant-hair-default-rtdb.firebaseio.com/" 
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Functions
+        // 1. Notice Functions
         function saveNotice() { db.ref('notice').set(document.getElementById('noticeText').value); alert("Updated!"); }
         function removeNotice() { db.ref('notice').remove(); alert("Removed!"); }
         
+        // 2. Social Links
         function updateLinks() {
             db.ref('links').set({
                 tg: document.getElementById('tgLink').value,
@@ -76,6 +78,7 @@
             alert("Links Updated!");
         }
 
+        // 3. Add Style
         function addStyle() {
             const url = document.getElementById('imgUrl').value;
             const name = document.getElementById('styleName').value;
@@ -86,10 +89,11 @@
             }
         }
 
-        // Load Bookings
+        // 4. Load Bookings
         db.ref('bookings').on('value', (snap) => {
             const list = document.getElementById('bookingList');
             list.innerHTML = '';
+            if(!snap.exists()) list.innerHTML = "No bookings found.";
             snap.forEach((child) => {
                 const b = child.val();
                 list.innerHTML += `<div class="item">
@@ -101,10 +105,11 @@
             });
         });
 
-        // Load Styles for Delete
+        // 5. Load Styles for Delete
         db.ref('styles').on('value', (snap) => {
             const list = document.getElementById('styleList');
             list.innerHTML = '';
+            if(!snap.exists()) list.innerHTML = "No styles found.";
             snap.forEach((child) => {
                 const data = child.val();
                 list.innerHTML += `<div class="item flex">
@@ -117,6 +122,7 @@
             });
         });
 
+        // Global Delete Function
         function del(path) { if(confirm("Are you sure?")) db.ref(path).remove(); }
     </script>
 </body>
