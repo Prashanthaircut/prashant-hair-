@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prashant Hair Salon</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gold: #d4af37; --dark: #0a0a0a; }
         body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; text-align: center; }
         
+        /* NAVU: Shop Status Bar */
+        #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; font-size: 16px; border-bottom: 2px solid #000; }
+        .status-open { background: #28a745; color: white; }
+        .status-closed { background: #e74c3c; color: white; }
+
         /* Notification Bar */
         #noticeBar { display:none; background:var(--gold); color:black; padding:8px; font-weight:bold; position:sticky; top:0; z-index:1000; border-bottom:2px solid #000; }
         
@@ -33,6 +38,8 @@
     </style>
 </head>
 <body>
+
+<div id="shopStatusDisplay"></div>
 
 <div id="noticeBar"><marquee id="noticeText"></marquee></div>
 
@@ -61,12 +68,27 @@
 </footer>
 
 <script>
+    // Tamari Database URL sathe connectivity
     const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function loadData() {
-        // Announcement Load
+        // 1. Shop Status Load (Navu Feature)
+        db.ref('shopStatus').on('value', snap => {
+            const status = snap.val() || "Open";
+            const el = document.getElementById('shopStatusDisplay');
+            el.style.display = 'block';
+            if(status === "Open") {
+                el.innerText = "● SHOP IS OPEN TODAY";
+                el.className = "status-open";
+            } else {
+                el.innerText = "● SHOP IS CLOSED NOW";
+                el.className = "status-closed";
+            }
+        });
+
+        // 2. Announcement Load
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
@@ -74,17 +96,24 @@
             else { bar.style.display = 'none'; }
         });
 
-        // Photos Load
+        // 3. Photos Load with Price & Title
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
             for (let id in data) {
-                div.innerHTML += `<div class="gallery-item"><img src="${data[id].url}" onclick="showImg('${data[id].url}')"><div style="padding:8px; font-size:13px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
+                div.innerHTML += `
+                    <div class="gallery-item">
+                        <img src="${data[id].url}" onclick="showImg('${data[id].url}')">
+                        <div style="padding:8px; font-size:13px;">
+                            <b>${data[id].title}</b><br>
+                            <span style="color:var(--gold)">₹${data[id].price}</span>
+                        </div>
+                    </div>`;
             }
         });
 
-        // Social Load
+        // 4. Social Links Load
         db.ref('social').on('value', snap => {
             const s = snap.val();
             if(s) {
@@ -96,8 +125,13 @@
         });
     }
 
-    function showImg(url) { document.getElementById('modalImg').src = url; document.getElementById('photoModal').style.display = 'flex'; }
+    // Zoom Image Function
+    function showImg(url) { 
+        document.getElementById('modalImg').src = url; 
+        document.getElementById('photoModal').style.display = 'flex'; 
+    }
 
+    // Submit Booking
     function submitBooking() {
         const name = document.getElementById('cName').value;
         const phone = document.getElementById('cPhone').value;
@@ -108,8 +142,9 @@
                 alert("Booking Successful!");
                 location.reload();
             });
-        } else { alert("Details bhariye!"); }
+        } else { alert("Aapka Naam, Phone aur Time bhariye!"); }
     }
+    
     window.onload = loadData;
 </script>
 </body>
