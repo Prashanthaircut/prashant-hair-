@@ -2,108 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Prashant Hair Salon</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f4f8; margin: 0; padding: 10px; }
-        #loginBox { background: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 300px; margin: auto; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-top: 4px solid #d4af37; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top:5px; }
-        .note-box { background: #fff9c4; padding: 8px; border-radius: 6px; font-size: 12px; border-left: 3px solid #fbc02d; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        td { padding: 10px 5px; border-bottom: 1px solid #eee; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .delete-btn { background: #dc3545; width: auto; padding: 5px 10px; margin-top: 5px; }
+        .style-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div id="loginBox">
-        <h3 style="margin-bottom:15px;">Admin Entry</h3>
-        <input type="password" id="passInput" placeholder="Enter Password">
-        <button onclick="checkPass()" style="background:#d4af37;">Login</button>
+    <h2>Admin Panel</h2>
+
+    <div class="card">
+        <h3>Add New Style</h3>
+        <input type="text" id="imgUrl" placeholder="Image URL">
+        <input type="text" id="styleName" placeholder="Style Name">
+        <input type="number" id="price" placeholder="Price">
+        <button onclick="addStyle()">Save Style</button>
     </div>
 
-    <div id="mainContent" style="display:none;">
-        <h2 style="text-align:center; font-size: 1.3em;">Admin Control</h2>
-
-        <div class="card" style="border-top-color: #ff9800;">
-            <h3>📢 Notification Bar</h3>
-            <input type="text" id="annMsg" placeholder="Offer message likhein...">
-            <button onclick="updateNotice()" style="background:#ff9800;">Show on Website</button>
-            <button onclick="clearNotice()" style="background:#666;">Remove Notice</button>
-        </div>
-
-        <div class="card" style="border-top-color: #3498db;">
-            <h3>Update Social Links</h3>
-            <input type="text" id="sTelegram" placeholder="Telegram Link">
-            <input type="text" id="sInsta" placeholder="Instagram Link">
-            <input type="text" id="sWA" placeholder="WhatsApp (91...)">
-            <button onclick="updateSocial()" style="background:#3498db;">Update Links</button>
-        </div>
-
-        <div class="card">
-            <h3>New Bookings</h3>
-            <table><tbody id="bookBody"></tbody></table>
-        </div>
-
-        <div class="card" style="border-top-color: #27ae60;">
-            <h3>Add Style</h3>
-            <input type="text" id="pUrl" placeholder="Image URL">
-            <input type="text" id="pTitle" placeholder="Style Name">
-            <input type="number" id="pPrice" placeholder="Price">
-            <button onclick="addPhoto()">Save</button>
-        </div>
-
-        <button onclick="location.reload()" style="background:#7f8c8d; width:100%; margin-bottom:50px;">Logout</button>
+    <div class="card">
+        <h3>Manage Styles (Delete)</h3>
+        <div id="styleList">Loading styles...</div>
     </div>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
+        // TAMARA FIREBASE NI CONFIGURATION AHI NAKHJO (Jem pela hati)
+        const firebaseConfig = {
+            databaseURL: "https://prashant-hair-default-rtdb.firebaseio.com/" 
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function checkPass() {
-            if(document.getElementById('passInput').value === "123") {
-                document.getElementById('loginBox').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                loadAdminData();
-            } else { alert("Wrong!"); }
+        // Style Add karva mate
+        function addStyle() {
+            const url = document.getElementById('imgUrl').value;
+            const name = document.getElementById('styleName').value;
+            const price = document.getElementById('price').value;
+            if(url && name && price) {
+                db.ref('styles').push({ url, name, price });
+                alert("Style added!");
+            }
         }
 
-        function updateNotice() {
-            const msg = document.getElementById('annMsg').value;
-            if(msg) { db.ref('announcement').set(msg); alert("Live ho gaya!"); }
-        }
-        function clearNotice() { db.ref('announcement').remove(); alert("Hata diya!"); }
-
-        function updateSocial() {
-            const tg = document.getElementById('sTelegram').value;
-            const ig = document.getElementById('sInsta').value;
-            const wa = document.getElementById('sWA').value;
-            db.ref('social').set({ tg, ig, wa }); alert("Links Updated!");
-        }
-
-        function loadAdminData() {
-            db.ref('bookings').on('value', snap => {
-                const data = snap.val();
-                const tbody = document.getElementById('bookBody');
-                tbody.innerHTML = '';
-                for(let id in data) {
-                    tbody.innerHTML += `<tr><td><b>${data[id].name}</b> (${data[id].phone})<br><small>${data[id].time}</small><div class="note-box">${data[id].note || 'No note'}</div></td><td align="right"><button onclick="del('bookings/${id}')" style="background:#e74c3c; padding:6px; border-radius:4px; width:50px;">Done</button></td></tr>`;
-                }
+        // Styles display karva ane delete button mookva mate
+        db.ref('styles').on('value', (snapshot) => {
+            const list = document.getElementById('styleList');
+            list.innerHTML = '';
+            snapshot.forEach((child) => {
+                const data = child.val();
+                list.innerHTML += `
+                    <div class="style-item">
+                        <img src="${data.url}">
+                        <span><b>${data.name}</b> - ₹${data.price}</span>
+                        <button class="delete-btn" onclick="deleteStyle('${child.key}')">Delete</button>
+                    </div>
+                `;
             });
-        }
+        });
 
-        function addPhoto() {
-            const url = document.getElementById('pUrl').value;
-            const title = document.getElementById('pTitle').value;
-            const price = document.getElementById('pPrice').value;
-            if(url && title && price) { db.ref('photos').push({url, title, price}); alert("Added!"); }
+        // Delete function
+        function deleteStyle(key) {
+            if(confirm("Are you sure you want to delete this?")) {
+                db.ref('styles/' + key).remove();
+            }
         }
-
-        function del(path) { if(confirm("Confirm?")) db.ref(path).remove(); }
     </script>
 </body>
 </html>
