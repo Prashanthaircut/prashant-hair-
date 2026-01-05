@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Prashant Hair Salon</title>
-    <meta name="description" content="Prashant Hair Salon - Best Style Studio. Book your appointment online.">
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         :root { --gold: #d4af37; --dark: #0a0a0a; }
         body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; text-align: center; }
-        
-        /* Notification & Status Bar */
         #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; font-size: 14px; }
         .status-open { background: #28a745; color: white; }
         .status-closed { background: #e74c3c; color: white; }
@@ -23,27 +17,21 @@
         .notice-content { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .bell-icon { font-size: 20px; animation: ring 2s infinite; }
         @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(15deg);} 20% {transform: rotate(-15deg);} 30% {transform: rotate(0);} }
-
         header { padding: 30px 15px; background: #000; border-bottom: 2px solid var(--gold); }
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         .gallery-item { background: rgba(30,30,30,0.8); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .gallery-item img { width: 100%; height: 140px; object-fit: cover; }
-
         .card { background: rgba(30,30,30,0.9); padding: 20px; margin: 15px; border-radius: 12px; border: 1px solid var(--gold); }
         input, textarea { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid #444; box-sizing: border-box; }
         .btn-gold { background: var(--gold); color: black; padding: 12px; border: none; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        footer { padding: 30px; border-top: 1px solid #222; margin-top: 20px; }
+        .social-links a { color: var(--gold); font-size: 24px; margin: 0 15px; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div id="shopStatusDisplay"></div>
-
-<div id="noticeBar">
-    <div class="notice-content">
-        <i class="fas fa-bell bell-icon"></i>
-        <span id="noticeText"></span>
-    </div>
-</div>
+<div id="noticeBar"><div class="notice-content"><i class="fas fa-bell bell-icon"></i><span id="noticeText"></span></div></div>
 
 <header><h1>PRASHANT <span style="color:var(--gold)">HAIR SALON</span></h1></header>
 
@@ -58,14 +46,17 @@
     <button class="btn-gold" onclick="submitBooking()">Confirm Booking</button>
 </div>
 
+<footer>
+    <div class="social-links" id="socialFooter"></div>
+    <p style="font-size: 12px; color: #666; margin-top: 15px;">© 2026 Prashant Hair Salon</p>
+</footer>
+
 <script>
-    // TAMARI FIREBASE DETAILS
     const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function loadData() {
-        // Shop Status Load
         db.ref('shopStatus').on('value', snap => {
             const status = snap.val() || "Open";
             const el = document.getElementById('shopStatusDisplay');
@@ -74,19 +65,13 @@
             el.className = status === "Open" ? "status-open" : "status-closed";
         });
 
-        // Offer Notification Load
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
-            if(msg) { 
-                bar.style.display = 'block'; 
-                document.getElementById('noticeText').innerText = msg; 
-            } else { 
-                bar.style.display = 'none'; 
-            }
+            if(msg) { bar.style.display = 'block'; document.getElementById('noticeText').innerText = msg; }
+            else { bar.style.display = 'none'; }
         });
 
-        // Styles Load
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
@@ -95,19 +80,27 @@
                 div.innerHTML += `<div class="gallery-item"><img src="${data[id].url}"><div style="padding:8px; font-size:12px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
             }
         });
+
+        // SOCIAL MEDIA LINKS LOAD
+        db.ref('social').on('value', snap => {
+            const s = snap.val();
+            if(s) {
+                document.getElementById('socialFooter').innerHTML = `
+                    <a href="${s.tg}" target="_blank"><i class="fab fa-telegram"></i></a>
+                    <a href="${s.ig}" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/${s.wa}" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+            }
+        });
     }
 
-    // APP MATE SUDHARELO BOOKING CODE
     function submitBooking() {
         const name = document.getElementById('cName').value;
         const phone = document.getElementById('cPhone').value;
         const time = document.getElementById('cTime').value;
         const note = document.getElementById('cNote').value;
-
         if (name && phone && time) {
             db.ref('bookings').push({ name, phone, time, note }).then(() => {
-                alert("✅ Booking Success!");
-                // Aa line App ma white screen nahi avva de
+                alert("✅ Booking Done!");
                 window.location.replace(window.location.href.split('?')[0]);
             });
         } else { alert("Details Fill Karo!"); }
