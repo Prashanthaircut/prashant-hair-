@@ -11,16 +11,25 @@
         #loginBox { background: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 300px; margin: auto; }
         .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-top: 4px solid #d4af37; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top:5px; }
-        .del-btn { background: #e74c3c; padding: 6px; border-radius: 4px; width: auto; font-size: 12px; }
+        button { color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top:5px; }
+        
+        /* Booking Details Style */
+        .booking-item { background: #fff; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .booking-info b { color: #d4af37; font-size: 16px; }
+        .booking-info p { margin: 4px 0; font-size: 14px; color: #333; }
+        .note-box { background: #fff9c4; padding: 8px; border-radius: 6px; font-size: 13px; border-left: 3px solid #fbc02d; margin-top: 5px; }
+        
+        .del-btn { background: #e74c3c; padding: 8px 15px; border-radius: 6px; width: auto; float: right; }
+        .status-open { background: #28a745; }
+        .status-closed { background: #e74c3c; }
         .flex { display: flex; align-items: center; justify-content: space-between; }
-        .status-btn { padding: 15px; font-size: 16px; margin-bottom: 10px; }
+        img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
     </style>
 </head>
 <body>
 
     <div id="loginBox">
-        <h3 style="margin-bottom:15px;">Admin Entry</h3>
+        <h3>Admin Entry</h3>
         <input type="password" id="passInput" placeholder="Enter Password">
         <button onclick="checkPass()" style="background:#d4af37;">Login</button>
     </div>
@@ -29,35 +38,35 @@
         <h2 style="text-align:center;">Admin Control</h2>
 
         <div class="card" style="border-top-color: #000;">
-            <h3>🏪 Shop Status (Open/Closed)</h3>
-            <div id="currentStatus" style="text-align:center; font-weight:bold; margin-bottom:10px;">Checking...</div>
-            <button onclick="setStatus('Open')" style="background:#28a745;">SET OPEN (Green)</button>
-            <button onclick="setStatus('Closed')" style="background:#e74c3c;">SET CLOSED (Red)</button>
+            <h3>🏪 Shop Status</h3>
+            <div id="displayStatus" style="text-align:center; font-weight:bold; margin-bottom:10px; font-size:18px;">Checking...</div>
+            <button onclick="setStatus('Open')" class="status-open">SET OPEN (Green)</button>
+            <button onclick="setStatus('Closed')" class="status-closed">SET CLOSED (Red)</button>
         </div>
 
         <div class="card" style="border-top-color: #ff9800;">
             <h3>📢 Notification Bar</h3>
-            <input type="text" id="annMsg" placeholder="Offer message...">
-            <button onclick="updateNotice()" style="background:#ff9800;">Show</button>
-            <button onclick="clearNotice()" style="background:#666;">Remove</button>
+            <input type="text" id="annMsg" placeholder="Offer ya Message likhein...">
+            <button onclick="updateNotice()" style="background:#ff9800;">Show on Website</button>
+            <button onclick="clearNotice()" style="background:#666;">Remove Notice</button>
         </div>
 
-        <div class="card">
-            <h3>New Bookings</h3>
-            <table><tbody id="bookBody"></tbody></table>
+        <div class="card" style="border-top-color: #3498db;">
+            <h3>📅 New Bookings</h3>
+            <div id="bookBody">Loading bookings...</div>
         </div>
 
         <div class="card" style="border-top-color: #27ae60;">
-            <h3>Add Style</h3>
+            <h3>✂️ Add Style</h3>
             <input type="text" id="pUrl" placeholder="Image URL">
-            <input type="text" id="pTitle" placeholder="Name">
+            <input type="text" id="pTitle" placeholder="Style Name">
             <input type="number" id="pPrice" placeholder="Price">
-            <button onclick="addPhoto()">Save</button>
+            <button onclick="addPhoto()" style="background:#27ae60;">Save Style</button>
         </div>
 
         <div class="card" style="border-top-color: #e74c3c;">
             <h3>🗑️ Delete Styles</h3>
-            <div id="styleList">Loading...</div>
+            <div id="styleList">Loading styles...</div>
         </div>
 
         <button onclick="location.reload()" style="background:#7f8c8d; width:100%; margin-bottom:50px;">Logout</button>
@@ -73,44 +82,57 @@
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 loadAdminData();
-            } else { alert("Wrong!"); }
+            } else { alert("Wrong Password!"); }
         }
 
-        // Shop Status Function
-        function setStatus(s) {
-            db.ref('shopStatus').set(s);
-            alert("Shop is now " + s);
-        }
+        // Notification Functions
+        function updateNotice() { db.ref('announcement').set(document.getElementById('annMsg').value); alert("Live Updated!"); }
+        function clearNotice() { db.ref('announcement').remove(); alert("Notice Removed!"); }
 
-        // Display Current Status
+        // Shop Status
+        function setStatus(s) { db.ref('shopStatus').set(s); alert("Shop status changed to " + s); }
+
         db.ref('shopStatus').on('value', snap => {
             const s = snap.val() || "Open";
-            const el = document.getElementById('currentStatus');
-            el.innerText = "Current Status: " + s.toUpperCase();
+            const el = document.getElementById('displayStatus');
+            el.innerText = "Current: " + s.toUpperCase();
             el.style.color = (s === 'Open') ? '#28a745' : '#e74c3c';
         });
 
-        function updateNotice() { db.ref('announcement').set(document.getElementById('annMsg').value); alert("Done!"); }
-        function clearNotice() { db.ref('announcement').remove(); }
-
         function loadAdminData() {
+            // Load Bookings with Full Details
             db.ref('bookings').on('value', snap => {
                 const data = snap.val();
-                const tbody = document.getElementById('bookBody');
-                tbody.innerHTML = '';
+                const container = document.getElementById('bookBody');
+                container.innerHTML = '';
+                if(!data) { container.innerHTML = 'No bookings found.'; return; }
                 for(let id in data) {
-                    tbody.innerHTML += `<tr><td><b>${data[id].name}</b></td><td align="right"><button onclick="del('bookings/${id}')" class="del-btn">Done</button></td></tr>`;
+                    container.innerHTML += `
+                        <div class="booking-item">
+                            <button onclick="del('bookings/${id}')" class="del-btn">Done</button>
+                            <div class="booking-info">
+                                <b>👤 ${data[id].name}</b>
+                                <p>📞 ${data[id].phone}</p>
+                                <p>⏰ ${data[id].time ? data[id].time.replace('T', ' ') : 'N/A'}</p>
+                                ${data[id].note ? `<div class="note-box">📝 ${data[id].note}</div>` : ''}
+                            </div>
+                            <div style="clear:both;"></div>
+                        </div>`;
                 }
             });
 
+            // Load Styles
             db.ref('photos').on('value', snap => {
                 const data = snap.val();
                 const list = document.getElementById('styleList');
                 list.innerHTML = '';
                 for(let id in data) {
                     list.innerHTML += `<div class="flex" style="padding:10px 0; border-bottom:1px solid #eee;">
-                        <span>${data[id].title}</span>
-                        <button onclick="del('photos/${id}')" class="del-btn">Delete</button>
+                        <div style="display:flex; align-items:center;">
+                            <img src="${data[id].url}">
+                            <span style="margin-left:10px;">${data[id].title}</span>
+                        </div>
+                        <button onclick="del('photos/${id}')" class="del-btn" style="background:#e74c3c;">Delete</button>
                     </div>`;
                 }
             });
