@@ -2,150 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Admin - Prashant Hair Salon</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prashant Salon Admin - Secure</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #f0f4f8; margin: 0; padding: 10px; }
-        #loginBox { background: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 300px; margin: auto; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-top: 4px solid #d4af37; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top:5px; }
-        
-        /* Booking Details Style */
-        .booking-item { background: #fff; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .booking-info b { color: #d4af37; font-size: 16px; }
-        .booking-info p { margin: 4px 0; font-size: 14px; color: #333; }
-        .note-box { background: #fff9c4; padding: 8px; border-radius: 6px; font-size: 13px; border-left: 3px solid #fbc02d; margin-top: 5px; }
-        
-        .del-btn { background: #e74c3c; padding: 8px 15px; border-radius: 6px; width: auto; float: right; }
-        .status-open { background: #28a745; }
-        .status-closed { background: #e74c3c; }
-        .flex { display: flex; align-items: center; justify-content: space-between; }
-        img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; }
+        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#d4af37; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
+        #adminContent { display: none; }
+        .header { background: #000; color: #d4af37; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .tab-content { display: none; padding: 15px; }
+        .active-tab { display: block; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ccc; }
+        .nav-item { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #666; font-size: 14px; }
+        .nav-item.active { color: #d4af37; border-top: 3px solid #d4af37; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn-gold { background: #d4af37; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .action-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-wa { background: #25D366; color: white; border: none; padding: 10px; border-radius: 8px; flex: 1; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-del { background: #ff4d4f; color: white; border: none; padding: 10px; border-radius: 8px; flex: 1; font-weight: bold; cursor: pointer; }
+        .booking-box { background: #fffbe6; padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #ffe58f; }
+        .photo-list-item { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .photo-list-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="loginBox">
-        <h3>Admin Entry</h3>
-        <input type="password" id="passInput" placeholder="Enter Password">
-        <button onclick="checkPass()" style="background:#d4af37;">Login</button>
+<div id="lockScreen">
+    <i class="fas fa-lock" style="font-size: 40px; margin-bottom: 20px;"></i>
+    <h2>Admin Login</h2>
+    <input type="password" id="passInput" placeholder="Enter Admin Password" style="width: 80%; text-align: center;">
+    <button class="btn-gold" onclick="checkPass()" style="width: 80%;">Unlock Panel</button>
+</div>
+
+<div id="adminContent">
+    <div class="header"><h2 style="margin:0;">PRASHANT ADMIN</h2></div>
+
+    <div id="dashboard" class="tab-content active-tab">
+        <div class="card">
+            <h3>Shop Status & Notice</h3>
+            <select id="statusSelect">
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+            </select>
+            <button class="btn-gold" onclick="updateStatus()">Update Status</button>
+            <input type="text" id="announcementInput" placeholder="Offer Message">
+            <button class="btn-gold" onclick="updateAnnouncement()">Update Notice</button>
+        </div>
+        <div class="card">
+            <h3>Recent Bookings</h3>
+            <div id="bookingList">Loading...</div>
+        </div>
     </div>
 
-    <div id="mainContent" style="display:none;">
-        <h2 style="text-align:center;">Admin Control</h2>
-
-        <div class="card" style="border-top-color: #000;">
-            <h3>🏪 Shop Status</h3>
-            <div id="displayStatus" style="text-align:center; font-weight:bold; margin-bottom:10px; font-size:18px;">Checking...</div>
-            <button onclick="setStatus('Open')" class="status-open">SET OPEN (Green)</button>
-            <button onclick="setStatus('Closed')" class="status-closed">SET CLOSED (Red)</button>
-        </div>
-
-        <div class="card" style="border-top-color: #ff9800;">
-            <h3>📢 Notification Bar</h3>
-            <input type="text" id="annMsg" placeholder="Offer ya Message likhein...">
-            <button onclick="updateNotice()" style="background:#ff9800;">Show on Website</button>
-            <button onclick="clearNotice()" style="background:#666;">Remove Notice</button>
-        </div>
-
-        <div class="card" style="border-top-color: #3498db;">
-            <h3>📅 New Bookings</h3>
-            <div id="bookBody">Loading bookings...</div>
-        </div>
-
-        <div class="card" style="border-top-color: #27ae60;">
-            <h3>✂️ Add Style</h3>
+    <div id="settings" class="tab-content">
+        <div class="card">
+            <h3>Add Style Photo</h3>
             <input type="text" id="pUrl" placeholder="Image URL">
             <input type="text" id="pTitle" placeholder="Style Name">
             <input type="number" id="pPrice" placeholder="Price">
-            <button onclick="addPhoto()" style="background:#27ae60;">Save Style</button>
+            <button class="btn-gold" onclick="addPhoto()">Add Photo</button>
         </div>
-
-        <div class="card" style="border-top-color: #e74c3c;">
-            <h3>🗑️ Delete Styles</h3>
-            <div id="styleList">Loading styles...</div>
+        <div class="card">
+            <h3>Manage Styles</h3>
+            <div id="adminPhotoList"></div>
         </div>
-
-        <button onclick="location.reload()" style="background:#7f8c8d; width:100%; margin-bottom:50px;">Logout</button>
+        <div class="card">
+            <h3>Social Links</h3>
+            <input type="text" id="waLink" placeholder="WhatsApp Number">
+            <input type="text" id="igLink" placeholder="Instagram Link">
+            <input type="text" id="tgLink" placeholder="Telegram Link">
+            <button class="btn-gold" onclick="updateSocial()">Save Links</button>
+        </div>
     </div>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showTab('dashboard', this)"><i class="fas fa-list"></i><br>Bookings</div>
+        <div class="nav-item" onclick="showTab('settings', this)"><i class="fas fa-cog"></i><br>Settings</div>
+    </div>
+</div>
 
-        function checkPass() {
-            if(document.getElementById('passInput').value === "123") {
-                document.getElementById('loginBox').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                loadAdminData();
-            } else { alert("Wrong Password!"); }
-        }
+<script>
+    const ADMIN_PASSWORD = "123"; 
 
-        // Notification Functions
-        function updateNotice() { db.ref('announcement').set(document.getElementById('annMsg').value); alert("Live Updated!"); }
-        function clearNotice() { db.ref('announcement').remove(); alert("Notice Removed!"); }
+    function checkPass() {
+        const input = document.getElementById('passInput').value;
+        if(input === ADMIN_PASSWORD) {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+            loadAdminData();
+        } else { alert("Wrong Password!"); }
+    }
 
-        // Shop Status
-        function setStatus(s) { db.ref('shopStatus').set(s); alert("Shop status changed to " + s); }
+    const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        db.ref('shopStatus').on('value', snap => {
-            const s = snap.val() || "Open";
-            const el = document.getElementById('displayStatus');
-            el.innerText = "Current: " + s.toUpperCase();
-            el.style.color = (s === 'Open') ? '#28a745' : '#e74c3c';
+    function showTab(tabId, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active-tab');
+        el.classList.add('active');
+    }
+
+    function loadAdminData() {
+        db.ref('bookings').on('value', snap => {
+            const data = snap.val();
+            const list = document.getElementById('bookingList');
+            list.innerHTML = '';
+            for(let id in data) {
+                // FIXED: Direct WhatsApp Link with 91
+                let customerPhone = data[id].phone;
+                if(!customerPhone.startsWith('91')) customerPhone = '91' + customerPhone;
+
+                list.innerHTML += `
+                    <div class="booking-box">
+                        <b>👤 ${data[id].name}</b><br>
+                        📞 ${data[id].phone}<br>
+                        ⏰ ${data[id].time.replace('T', ' ')}<br>
+                        💬 ${data[id].note || '-'}<br>
+                        <div class="action-btns">
+                            <a href="https://wa.me/${customerPhone}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i> Chat</a>
+                            <button class="btn-del" onclick="deleteBooking('${id}')"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>`;
+            }
         });
 
-        function loadAdminData() {
-            // Load Bookings with Full Details
-            db.ref('bookings').on('value', snap => {
-                const data = snap.val();
-                const container = document.getElementById('bookBody');
-                container.innerHTML = '';
-                if(!data) { container.innerHTML = 'No bookings found.'; return; }
-                for(let id in data) {
-                    container.innerHTML += `
-                        <div class="booking-item">
-                            <button onclick="del('bookings/${id}')" class="del-btn">Done</button>
-                            <div class="booking-info">
-                                <b>👤 ${data[id].name}</b>
-                                <p>📞 ${data[id].phone}</p>
-                                <p>⏰ ${data[id].time ? data[id].time.replace('T', ' ') : 'N/A'}</p>
-                                ${data[id].note ? `<div class="note-box">📝 ${data[id].note}</div>` : ''}
-                            </div>
-                            <div style="clear:both;"></div>
-                        </div>`;
-                }
-            });
+        db.ref('photos').on('value', snap => {
+            const data = snap.val();
+            const list = document.getElementById('adminPhotoList');
+            list.innerHTML = '';
+            for(let id in data) {
+                list.innerHTML += `<div class="photo-list-item"><img src="${data[id].url}"><div style="flex:1;"><b>${data[id].title}</b> - ₹${data[id].price}</div><button style="background:red; color:white; border:none; padding:5px;" onclick="deletePhoto('${id}')">X</button></div>`;
+            }
+        });
+    }
 
-            // Load Styles
-            db.ref('photos').on('value', snap => {
-                const data = snap.val();
-                const list = document.getElementById('styleList');
-                list.innerHTML = '';
-                for(let id in data) {
-                    list.innerHTML += `<div class="flex" style="padding:10px 0; border-bottom:1px solid #eee;">
-                        <div style="display:flex; align-items:center;">
-                            <img src="${data[id].url}">
-                            <span style="margin-left:10px;">${data[id].title}</span>
-                        </div>
-                        <button onclick="del('photos/${id}')" class="del-btn" style="background:#e74c3c;">Delete</button>
-                    </div>`;
-                }
-            });
-        }
-
-        function addPhoto() {
-            const url = document.getElementById('pUrl').value;
-            const title = document.getElementById('pTitle').value;
-            const price = document.getElementById('pPrice').value;
-            if(url && title && price) { db.ref('photos').push({url, title, price}); alert("Added!"); }
-        }
-
-        function del(path) { if(confirm("Are you sure?")) db.ref(path).remove(); }
-    </script>
+    function deleteBooking(id) { if(confirm("Delete this booking?")) db.ref('bookings/' + id).remove(); }
+    function deletePhoto(id) { if(confirm("Delete style?")) db.ref('photos/' + id).remove(); }
+    function updateStatus() { db.ref('shopStatus').set(document.getElementById('statusSelect').value).then(()=>alert("Done")); }
+    function updateAnnouncement() { db.ref('announcement').set(document.getElementById('announcementInput').value).then(()=>alert("Done")); }
+    function addPhoto() {
+        const u = document.getElementById('pUrl').value, t = document.getElementById('pTitle').value, p = document.getElementById('pPrice').value;
+        if(u && t && p) db.ref('photos').push({url:u, title:t, price:p}).then(()=>alert("Added"));
+    }
+    function updateSocial() { db.ref('social').set({wa:document.getElementById('waLink').value, ig:document.getElementById('igLink').value, tg:document.getElementById('tgLink').value}).then(()=>alert("Saved")); }
+</script>
 </body>
 </html>
