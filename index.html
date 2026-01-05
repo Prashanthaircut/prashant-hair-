@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prashant Hair Salon</title>
+    
+    <title>Prashant Hair Salon | Best Style Studio</title>
+    <meta name="description" content="Prashant Hair Salon - Best Hair Style Studio for Men. Book your appointment online for haircut and beard styling.">
+    <meta name="keywords" content="Prashant Hair Salon, Haircut, Salon near me, Online Booking Salon, Hair Style">
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root { --gold: #d4af37; --dark: #0a0a0a; }
         body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; text-align: center; }
@@ -17,7 +22,7 @@
         .status-closed { background: #e74c3c; color: white; }
 
         /* 2. Notification ICON Bar */
-        #noticeBar { display:none; background: #222; color:var(--gold); padding:12px; position:sticky; top:0; z-index:1000; border-bottom:1px solid var(--gold); }
+        #noticeBar { display:none; background: #222; color:var(--gold); padding:12px; position:sticky; top:0; z-index:1000; border-bottom: 1px solid var(--gold); }
         .notice-content { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .bell-icon { font-size: 20px; animation: ring 2s infinite; }
         @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(15deg);} 20% {transform: rotate(-15deg);} 30% {transform: rotate(0);} }
@@ -27,8 +32,9 @@
 
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         .gallery-item { background: rgba(30,30,30,0.8); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .gallery-item img { width: 100%; height: 140px; object-fit: cover; }
+        .gallery-item img { width: 100%; height: 140px; object-fit: cover; cursor: pointer; }
 
+        /* Zoom Modal */
         #photoModal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
         #modalImg { max-width: 90%; max-height: 80%; border: 2px solid var(--gold); border-radius: 10px; }
 
@@ -79,15 +85,15 @@
             const el = document.getElementById('shopStatusDisplay');
             el.style.display = 'block';
             if(status === "Open") {
-                el.innerText = "● SHOP IS OPEN";
+                el.innerText = "● SHOP IS OPEN TODAY";
                 el.className = "status-open";
             } else {
-                el.innerText = "● SHOP IS CLOSED";
+                el.innerText = "● SHOP IS CLOSED NOW";
                 el.className = "status-closed";
             }
         });
 
-        // Notification with Icon
+        // Announcement with Icon
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
@@ -99,24 +105,39 @@
             }
         });
 
+        // Photos Load
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
             for (let id in data) {
-                div.innerHTML += `<div class="gallery-item"><img src="${data[id].url}" onclick="showImg('${data[id].url}')"><div style="padding:8px; font-size:12px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
+                div.innerHTML += `
+                    <div class="gallery-item">
+                        <img src="${data[id].url}" onclick="showImg('${data[id].url}')">
+                        <div style="padding:8px; font-size:12px;">
+                            <b>${data[id].title}</b><br>
+                            <span style="color:var(--gold)">₹${data[id].price}</span>
+                        </div>
+                    </div>`;
             }
         });
     }
 
-    function showImg(url) { document.getElementById('modalImg').src = url; document.getElementById('photoModal').style.display = 'flex'; }
+    function showImg(url) { 
+        document.getElementById('modalImg').src = url; 
+        document.getElementById('photoModal').style.display = 'flex'; 
+    }
+
     function submitBooking() {
         const name = document.getElementById('cName').value;
         const phone = document.getElementById('cPhone').value;
         const time = document.getElementById('cTime').value;
         const note = document.getElementById('cNote').value;
         if (name && phone && time) {
-            db.ref('bookings').push({ name, phone, time, note }).then(() => { alert("Booking Done!"); location.reload(); });
+            db.ref('bookings').push({ name, phone, time, note }).then(() => {
+                alert("Booking Done!");
+                location.reload();
+            });
         } else { alert("Details fill karein!"); }
     }
     window.onload = loadData;
