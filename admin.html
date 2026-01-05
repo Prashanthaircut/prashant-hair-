@@ -12,12 +12,9 @@
         .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-top: 4px solid #d4af37; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top:5px; }
-        .note-box { background: #fff9c4; padding: 8px; border-radius: 6px; font-size: 12px; border-left: 3px solid #fbc02d; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        td { padding: 10px 5px; border-bottom: 1px solid #eee; }
         .del-btn { background: #e74c3c; padding: 6px; border-radius: 4px; width: auto; font-size: 12px; }
-        .style-img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; margin-right: 10px; }
         .flex { display: flex; align-items: center; justify-content: space-between; }
+        .status-btn { padding: 15px; font-size: 16px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -29,21 +26,20 @@
     </div>
 
     <div id="mainContent" style="display:none;">
-        <h2 style="text-align:center; font-size: 1.3em;">Admin Control</h2>
+        <h2 style="text-align:center;">Admin Control</h2>
+
+        <div class="card" style="border-top-color: #000;">
+            <h3>🏪 Shop Status (Open/Closed)</h3>
+            <div id="currentStatus" style="text-align:center; font-weight:bold; margin-bottom:10px;">Checking...</div>
+            <button onclick="setStatus('Open')" style="background:#28a745;">SET OPEN (Green)</button>
+            <button onclick="setStatus('Closed')" style="background:#e74c3c;">SET CLOSED (Red)</button>
+        </div>
 
         <div class="card" style="border-top-color: #ff9800;">
             <h3>📢 Notification Bar</h3>
-            <input type="text" id="annMsg" placeholder="Offer message likhein...">
-            <button onclick="updateNotice()" style="background:#ff9800;">Show on Website</button>
-            <button onclick="clearNotice()" style="background:#666;">Remove Notice</button>
-        </div>
-
-        <div class="card" style="border-top-color: #3498db;">
-            <h3>Update Social Links</h3>
-            <input type="text" id="sTelegram" placeholder="Telegram Link">
-            <input type="text" id="sInsta" placeholder="Instagram Link">
-            <input type="text" id="sWA" placeholder="WhatsApp (91...)">
-            <button onclick="updateSocial()" style="background:#3498db;">Update Links</button>
+            <input type="text" id="annMsg" placeholder="Offer message...">
+            <button onclick="updateNotice()" style="background:#ff9800;">Show</button>
+            <button onclick="clearNotice()" style="background:#666;">Remove</button>
         </div>
 
         <div class="card">
@@ -54,21 +50,20 @@
         <div class="card" style="border-top-color: #27ae60;">
             <h3>Add Style</h3>
             <input type="text" id="pUrl" placeholder="Image URL">
-            <input type="text" id="pTitle" placeholder="Style Name">
+            <input type="text" id="pTitle" placeholder="Name">
             <input type="number" id="pPrice" placeholder="Price">
             <button onclick="addPhoto()">Save</button>
         </div>
 
         <div class="card" style="border-top-color: #e74c3c;">
             <h3>🗑️ Delete Styles</h3>
-            <div id="styleList">Loading styles...</div>
+            <div id="styleList">Loading...</div>
         </div>
 
         <button onclick="location.reload()" style="background:#7f8c8d; width:100%; margin-bottom:50px;">Logout</button>
     </div>
 
     <script>
-        // Database link updated to yours
         const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -81,44 +76,41 @@
             } else { alert("Wrong!"); }
         }
 
-        function updateNotice() {
-            const msg = document.getElementById('annMsg').value;
-            if(msg) { db.ref('announcement').set(msg); alert("Live ho gaya!"); }
+        // Shop Status Function
+        function setStatus(s) {
+            db.ref('shopStatus').set(s);
+            alert("Shop is now " + s);
         }
-        function clearNotice() { db.ref('announcement').remove(); alert("Hata diya!"); }
 
-        function updateSocial() {
-            const tg = document.getElementById('sTelegram').value;
-            const ig = document.getElementById('sInsta').value;
-            const wa = document.getElementById('sWA').value;
-            db.ref('social').set({ tg, ig, wa }); alert("Links Updated!");
-        }
+        // Display Current Status
+        db.ref('shopStatus').on('value', snap => {
+            const s = snap.val() || "Open";
+            const el = document.getElementById('currentStatus');
+            el.innerText = "Current Status: " + s.toUpperCase();
+            el.style.color = (s === 'Open') ? '#28a745' : '#e74c3c';
+        });
+
+        function updateNotice() { db.ref('announcement').set(document.getElementById('annMsg').value); alert("Done!"); }
+        function clearNotice() { db.ref('announcement').remove(); }
 
         function loadAdminData() {
-            // Load Bookings
             db.ref('bookings').on('value', snap => {
                 const data = snap.val();
                 const tbody = document.getElementById('bookBody');
                 tbody.innerHTML = '';
                 for(let id in data) {
-                    tbody.innerHTML += `<tr><td><b>${data[id].name}</b> (${data[id].phone})<br><small>${data[id].time}</small><div class="note-box">${data[id].note || 'No note'}</div></td><td align="right"><button onclick="del('bookings/${id}')" class="del-btn">Done</button></td></tr>`;
+                    tbody.innerHTML += `<tr><td><b>${data[id].name}</b></td><td align="right"><button onclick="del('bookings/${id}')" class="del-btn">Done</button></td></tr>`;
                 }
             });
 
-            // Load Styles for Deleting
             db.ref('photos').on('value', snap => {
                 const data = snap.val();
                 const list = document.getElementById('styleList');
                 list.innerHTML = '';
-                if(!data) { list.innerHTML = 'No styles found.'; return; }
                 for(let id in data) {
-                    list.innerHTML += `
-                    <div class="flex" style="padding:10px 0; border-bottom:1px solid #eee;">
-                        <div style="display:flex; align-items:center;">
-                            <img src="${data[id].url}" class="style-img">
-                            <span><b>${data[id].title}</b><br>₹${data[id].price}</span>
-                        </div>
-                        <button onclick="del('photos/${id}')" class="del-btn" style="width:auto;">Delete</button>
+                    list.innerHTML += `<div class="flex" style="padding:10px 0; border-bottom:1px solid #eee;">
+                        <span>${data[id].title}</span>
+                        <button onclick="del('photos/${id}')" class="del-btn">Delete</button>
                     </div>`;
                 }
             });
@@ -131,7 +123,7 @@
             if(url && title && price) { db.ref('photos').push({url, title, price}); alert("Added!"); }
         }
 
-        function del(path) { if(confirm("Confirm Delete?")) db.ref(path).remove(); }
+        function del(path) { if(confirm("Are you sure?")) db.ref(path).remove(); }
     </script>
 </body>
 </html>
