@@ -9,12 +9,11 @@
     <style>
         body { font-family: sans-serif; background: #f0f2f5; padding: 15px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h3 { margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
         button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
         .save-btn { background: #28a745; }
-        .delete-btn { background: #dc3545; width: auto; padding: 6px 12px; font-size: 14px; margin-left: 10px; }
-        .done-btn { background: #dc3545; width: auto; float: right; padding: 6px 15px; }
+        .delete-btn { background: #dc3545; width: auto; padding: 6px 12px; font-size: 13px; }
+        .done-btn { background: #dc3545; width: auto; float: right; }
         .item { border-bottom: 1px solid #eee; padding: 15px 0; }
         img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
         .flex { display: flex; align-items: center; justify-content: space-between; }
@@ -26,9 +25,17 @@
 
     <div class="card">
         <h3>📢 Notification Bar</h3>
-        <input type="text" id="noticeText" placeholder="Enter offer message...">
+        <input type="text" id="noticeText" placeholder="Offer message likhein...">
         <button onclick="saveNotice()">Show on Website</button>
         <button style="background:#6c757d; margin-top:5px;" onclick="removeNotice()">Remove Notice</button>
+    </div>
+
+    <div class="card">
+        <h3>🔗 Update Social Links</h3>
+        <input type="text" id="tgLink" placeholder="Telegram Link">
+        <input type="text" id="igLink" placeholder="Instagram Link">
+        <input type="text" id="waLink" placeholder="WhatsApp (91...)">
+        <button style="background:#00acee;" onclick="updateLinks()">Update Links</button>
     </div>
 
     <div class="card">
@@ -50,56 +57,54 @@
     </div>
 
     <script>
-        // Database Config
         const firebaseConfig = { 
             databaseURL: "https://prashant-hair-default-rtdb.firebaseio.com/" 
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. Notice Functions
-        function saveNotice() {
-            const text = document.getElementById('noticeText').value;
-            db.ref('notice').set(text);
-            alert("Notice Updated!");
-        }
-        function removeNotice() {
-            db.ref('notice').remove();
-            alert("Notice Removed!");
-        }
-
-        // 2. Load Bookings
-        db.ref('bookings').on('value', (snap) => {
-            const list = document.getElementById('bookingList');
-            list.innerHTML = '';
-            if(!snap.exists()) list.innerHTML = 'No new bookings.';
-            snap.forEach((child) => {
-                const b = child.val();
-                list.innerHTML += `<div class="item">
-                    <b>${b.name}</b> (${b.phone})<br><small>${b.date}</small><br>
-                    <i style="background:#fff9c4;">${b.message}</i>
-                    <button class="done-btn" onclick="deleteItem('bookings/${child.key}')">Done</button>
-                    <div style="clear:both;"></div>
-                </div>`;
+        // Functions
+        function saveNotice() { db.ref('notice').set(document.getElementById('noticeText').value); alert("Updated!"); }
+        function removeNotice() { db.ref('notice').remove(); alert("Removed!"); }
+        
+        function updateLinks() {
+            db.ref('links').set({
+                tg: document.getElementById('tgLink').value,
+                ig: document.getElementById('igLink').value,
+                wa: document.getElementById('waLink').value
             });
-        });
+            alert("Links Updated!");
+        }
 
-        // 3. Add Style
         function addStyle() {
             const url = document.getElementById('imgUrl').value;
             const name = document.getElementById('styleName').value;
             const price = document.getElementById('price').value;
             if(url && name && price) {
                 db.ref('styles').push({ url, name, price });
-                alert("Style added!");
+                alert("Style Saved!");
             }
         }
 
-        // 4. Load Styles with Delete
+        // Load Bookings
+        db.ref('bookings').on('value', (snap) => {
+            const list = document.getElementById('bookingList');
+            list.innerHTML = '';
+            snap.forEach((child) => {
+                const b = child.val();
+                list.innerHTML += `<div class="item">
+                    <b>${b.name}</b> (${b.phone})<br>
+                    <i style="background:#fff9c4;">${b.message}</i>
+                    <button class="done-btn" onclick="del('bookings/${child.key}')">Done</button>
+                    <div style="clear:both;"></div>
+                </div>`;
+            });
+        });
+
+        // Load Styles for Delete
         db.ref('styles').on('value', (snap) => {
             const list = document.getElementById('styleList');
             list.innerHTML = '';
-            if(!snap.exists()) list.innerHTML = 'No styles found.';
             snap.forEach((child) => {
                 const data = child.val();
                 list.innerHTML += `<div class="item flex">
@@ -107,17 +112,12 @@
                         <img src="${data.url}">
                         <div style="margin-left:10px;"><b>${data.name}</b><br>₹${data.price}</div>
                     </div>
-                    <button class="delete-btn" onclick="deleteItem('styles/${child.key}')">Delete</button>
+                    <button class="delete-btn" onclick="del('styles/${child.key}')">Delete</button>
                 </div>`;
             });
         });
 
-        // Delete Helper
-        function deleteItem(path) {
-            if(confirm("Are you sure?")) {
-                db.ref(path).remove();
-            }
-        }
+        function del(path) { if(confirm("Are you sure?")) db.ref(path).remove(); }
     </script>
 </body>
 </html>
