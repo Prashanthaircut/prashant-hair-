@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Prashant Hair Salon</title>
+    <title>Admin Panel - Prashant Hair Salon</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-        .delete-btn { background: #dc3545; width: auto; padding: 5px 10px; margin-top: 5px; }
-        .style-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 15px; margin: 0; }
+        h2 { text-align: center; color: #333; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h3 { margin-top: 0; color: #444; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+        .save-btn { background: #28a745; }
+        .delete-btn { background: #dc3545; width: auto; padding: 6px 12px; font-size: 14px; }
+        .done-btn { background: #dc3545; width: auto; float: right; padding: 6px 15px; }
+        .item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; margin-right: 15px; }
+        .flex-row { display: flex; align-items: center; justify-content: space-between; }
+        .booking-info { background: #fff9c4; padding: 8px; border-radius: 5px; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -21,27 +28,67 @@
     <h2>Admin Panel</h2>
 
     <div class="card">
-        <h3>Add New Style</h3>
-        <input type="text" id="imgUrl" placeholder="Image URL">
-        <input type="text" id="styleName" placeholder="Style Name">
-        <input type="number" id="price" placeholder="Price">
-        <button onclick="addStyle()">Save Style</button>
+        <h3>📢 Notification Bar</h3>
+        <input type="text" id="noticeText" placeholder="Offer message likhein...">
+        <button onclick="saveNotice()">Show on Website</button>
+        <button style="background:#6c757d;" onclick="removeNotice()">Remove Notice</button>
     </div>
 
     <div class="card">
-        <h3>Manage Styles (Delete)</h3>
+        <h3>📅 New Bookings</h3>
+        <div id="bookingList">Loading bookings...</div>
+    </div>
+
+    <div class="card">
+        <h3>✂️ Add New Style</h3>
+        <input type="text" id="imgUrl" placeholder="Image URL">
+        <input type="text" id="styleName" placeholder="Style Name">
+        <input type="number" id="price" placeholder="Price">
+        <button class="save-btn" onclick="addStyle()">Save Style</button>
+    </div>
+
+    <div class="card">
+        <h3>🗑️ Manage Styles (Delete)</h3>
         <div id="styleList">Loading styles...</div>
     </div>
 
     <script>
-        // TAMARA FIREBASE NI CONFIGURATION AHI NAKHJO (Jem pela hati)
-        const firebaseConfig = {
+        // Database Connection
+        const firebaseConfig = { 
             databaseURL: "https://prashant-hair-default-rtdb.firebaseio.com/" 
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Style Add karva mate
+        // Notification Functions
+        function saveNotice() {
+            const text = document.getElementById('noticeText').value;
+            if(text) { db.ref('notice').set(text); alert("Notice Updated!"); }
+        }
+        function removeNotice() {
+            db.ref('notice').remove();
+            alert("Notice Removed!");
+        }
+
+        // Booking Load & Done
+        db.ref('bookings').on('value', (snap) => {
+            const list = document.getElementById('bookingList');
+            list.innerHTML = '';
+            if(!snap.exists()) { list.innerHTML = 'No new bookings.'; }
+            snap.forEach((child) => {
+                const b = child.val();
+                list.innerHTML += `
+                    <div class="item">
+                        <b>${b.name}</b> (${b.phone})<br>
+                        <small>${b.date}</small>
+                        <span class="booking-info">${b.message}</span>
+                        <button class="done-btn" onclick="deleteItem('bookings/${child.key}')">Done</button>
+                        <div style="clear:both;"></div>
+                    </div>`;
+            });
+        });
+
+        // Style Add
         function addStyle() {
             const url = document.getElementById('imgUrl').value;
             const name = document.getElementById('styleName').value;
@@ -49,29 +96,34 @@
             if(url && name && price) {
                 db.ref('styles').push({ url, name, price });
                 alert("Style added!");
-            }
+                document.getElementById('imgUrl').value = '';
+                document.getElementById('styleName').value = '';
+                document.getElementById('price').value = '';
+            } else { alert("Please fill all fields!"); }
         }
 
-        // Styles display karva ane delete button mookva mate
-        db.ref('styles').on('value', (snapshot) => {
+        // Style Load with Delete
+        db.ref('styles').on('value', (snap) => {
             const list = document.getElementById('styleList');
             list.innerHTML = '';
-            snapshot.forEach((child) => {
+            if(!snap.exists()) { list.innerHTML = 'No styles found.'; }
+            snap.forEach((child) => {
                 const data = child.val();
                 list.innerHTML += `
-                    <div class="style-item">
-                        <img src="${data.url}">
-                        <span><b>${data.name}</b> - ₹${data.price}</span>
-                        <button class="delete-btn" onclick="deleteStyle('${child.key}')">Delete</button>
-                    </div>
-                `;
+                    <div class="item flex-row">
+                        <div style="display:flex; align-items:center;">
+                            <img src="${data.url}">
+                            <span><b>${data.name}</b><br>₹${data.price}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteItem('styles/${child.key}')">Delete</button>
+                    </div>`;
             });
         });
 
-        // Delete function
-        function deleteStyle(key) {
+        // Global Delete Function
+        function deleteItem(path) {
             if(confirm("Are you sure you want to delete this?")) {
-                db.ref('styles/' + key).remove();
+                db.ref(path).remove();
             }
         }
     </script>
