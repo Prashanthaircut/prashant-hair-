@@ -13,61 +13,67 @@
         :root { --gold: #d4af37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.08); }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; user-select: none; }
 
-        #noticeBar { display:none; background: var(--gold); color: #000; padding: 12px; font-weight: bold; position: sticky; top:0; z-index: 1000; text-align: center; }
-        .bell { animation: ring 1.5s infinite; margin-right: 8px; }
-        @keyframes ring { 0% {transform: rotate(0);} 10% {transform: rotate(20deg);} 20% {transform: rotate(-20deg);} 30% {transform: rotate(0);} }
-
-        #shopStatusDisplay { display: none; padding: 10px; font-size: 13px; font-weight: bold; text-align: center; }
+        #noticeBar { display:none; background: var(--gold); color: #000; padding: 10px; font-weight: bold; position: sticky; top:0; z-index: 1000; text-align: center; font-size: 14px; }
+        
+        #shopStatusDisplay { display: none; padding: 8px; font-size: 12px; font-weight: bold; text-align: center; }
         .open { background: #28a745; }
         .closed { background: #e74c3c; }
 
-        header { padding: 40px 20px; text-align: center; background: #000; border-bottom: 2px solid var(--gold); }
-        
-        /* Gallery Click Fix */
-        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
-        .gallery-item { background: #161616; border-radius: 12px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
-        .gallery-item:active { transform: scale(0.95); }
-        .gallery-item img { width: 100%; height: 140px; object-fit: cover; pointer-events: none; }
+        header { padding: 20px 10px; text-align: center; background: #000; border-bottom: 2px solid var(--gold); }
+        .main-logo { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 8px; object-fit: cover; }
+        header h1 { font-size: 20px; margin: 0; letter-spacing: 1px; }
 
-        .card { background: var(--glass); backdrop-filter: blur(10px); padding: 25px; margin: 15px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #111; color: #fff; border: 1px solid #333; box-sizing: border-box; }
-        .btn-gold { background: var(--gold); color: #000; padding: 15px; border: none; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
+        .gallery-item { background: #161616; border-radius: 10px; overflow: hidden; border: 1px solid #333; cursor: pointer; }
+        .gallery-item img { width: 100%; height: 130px; object-fit: cover; }
 
-        /* Full Screen Image Modal */
-        #imgModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+        #imgModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         #imgModal img { max-width: 90%; max-height: 80%; border-radius: 10px; border: 2px solid var(--gold); }
 
-        footer { padding: 30px 20px; text-align: center; border-top: 1px solid #222; }
-        .social-links a { color: var(--gold); font-size: 26px; margin: 0 15px; text-decoration: none; }
+        .card { background: var(--glass); backdrop-filter: blur(10px); padding: 25px; margin: 15px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #111; color: #fff; border: 1px solid #333; box-sizing: border-box; }
+        .btn-gold { background: var(--gold); color: #000; padding: 15px; border: none; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; }
+
+        footer { padding: 25px 15px; text-align: center; border-top: 1px solid #222; margin-bottom: 70px; }
+        .social-links a { color: var(--gold); font-size: 24px; margin: 0 12px; text-decoration: none; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div id="noticeBar"><i class="fas fa-bell bell"></i><span id="noticeText"></span></div>
+<div id="noticeBar"><i class="fas fa-bell"></i> <span id="noticeText"></span></div>
 <div id="shopStatusDisplay"></div>
 
-<header><h1>PRASHANT <span style="color:var(--gold)">SALON</span></h1></header>
+<header>
+    <img src="https://i.postimg.cc/T2gyYbjx/Screenshot-2026-01-04-15-01-24-41-680d03679600f7af0b4c700c6b270fe7.jpg" alt="Logo" class="main-logo">
+    <h1>PRASHANT <span style="color:var(--gold)">SALON</span></h1>
+</header>
+
+<div style="text-align: center; margin: 15px 0;">
+    <div id="container-e19879a3da347b749666c8916361a4b4"></div>
+</div>
 
 <div id="galleryDisplay" class="gallery-grid"></div>
 
 <div id="imgModal" onclick="this.style.display='none'">
     <img id="fullImg" src="">
-    <p style="position:absolute; bottom:20px; color:var(--gold);">Tap anywhere to close</p>
+    <p style="color:var(--gold); margin-top:15px;">Tap to close</p>
 </div>
 
 <div class="card">
-    <h3 style="color:var(--gold); margin-top:0; text-align:center;">BOOK APPOINTMENT</h3>
+    <h3 style="color:var(--gold); text-align:center; margin-top:0;">BOOK APPOINTMENT</h3>
     <input type="text" id="cName" placeholder="Aapka Naam">
-    <input type="tel" id="cPhone" placeholder="Mobile Number (10 Digits)">
+    <input type="tel" id="cPhone" placeholder="Mobile Number">
     <input type="datetime-local" id="cTime">
-    <textarea id="cNote" placeholder="Style details..." rows="2"></textarea>
+    <textarea id="cNote" placeholder="Style details/Description..." rows="2"></textarea>
     <button class="btn-gold" onclick="secureBooking()">Confirm Booking</button>
 </div>
 
 <footer>
     <div class="social-links" id="socialFooter"></div>
-    <p style="font-size: 11px; color: #555; margin-top: 20px;">PRASHANT HAIR SALON © 2026</p>
+    <p style="font-size: 10px; color: #555; margin-top: 15px;">PRASHANT HAIR SALON © 2026</p>
 </footer>
+
+<script type='text/javascript' src='//pl25446059.profitablecpmrate.com/6e/02/7e/6e027e025f162a8c381c8282f64a4b41.js'></script>
 
 <script>
     const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
@@ -75,7 +81,6 @@
     const db = firebase.database();
 
     function loadData() {
-        // Load Status
         db.ref('shopStatus').on('value', snap => {
             const s = snap.val() || "Open";
             const el = document.getElementById('shopStatusDisplay');
@@ -84,7 +89,6 @@
             el.className = s === "Open" ? "open" : "closed";
         });
 
-        // Load Notice
         db.ref('announcement').on('value', snap => {
             const msg = snap.val();
             const bar = document.getElementById('noticeBar');
@@ -94,24 +98,15 @@
             } else { bar.style.display = 'none'; }
         });
 
-        // Load Gallery with Click Fix
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
             for (let id in data) {
-                div.innerHTML += `
-                <div class="gallery-item" onclick="openImg('${data[id].url}')">
-                    <img src="${data[id].url}">
-                    <div style="padding:10px; font-size:12px;">
-                        <b>${data[id].title}</b><br>
-                        <span style="color:var(--gold)">₹${data[id].price}</span>
-                    </div>
-                </div>`;
+                div.innerHTML += `<div class="gallery-item" onclick="openImg('${data[id].url}')"><img src="${data[id].url}"><div style="padding:8px; font-size:11px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
             }
         });
 
-        // Load Social
         db.ref('social').on('value', snap => {
             const s = snap.val();
             if(s) {
@@ -123,7 +118,6 @@
         });
     }
 
-    // Photo Click Function
     function openImg(url) {
         document.getElementById('fullImg').src = url;
         document.getElementById('imgModal').style.display = 'flex';
@@ -133,21 +127,15 @@
         const name = document.getElementById('cName').value.trim();
         const phone = document.getElementById('cPhone').value.trim();
         const time = document.getElementById('cTime').value;
-        if(name.length < 3 || phone.length !== 10 || !time) { 
-            alert("Please fill name, 10-digit phone and time!"); 
-            return; 
-        }
-
-        db.ref('bookings').push({
-            name, phone, time, note: document.getElementById('cNote').value, submittedAt: Date.now()
-        }).then(() => {
-            alert("✅ Booking Done!");
-            window.location.replace(window.location.origin + window.location.pathname + "?v=" + Date.now());
-        });
+        const note = document.getElementById('cNote').value;
+        if(name.length < 3 || phone.length !== 10 || !time) { alert("Naam, Number aur Time sahi dale!"); return; }
+        db.ref('bookings').push({ name, phone, time, note, submittedAt: Date.now() }).then(() => { alert("✅ Booking Done!"); });
     }
     window.onload = loadData;
 </script>
+
+<script async="async" data-cfasync="false" src="//pl25446077.profitablecpmrate.com/e19879a3da347b749666c8916361a4b4/invoke.js"></script>
 <script async="async" data-cfasync="false" src="https://pl28406257.effectivegatecpm.com/e19879a3da347b315bf58c516fce91a0/invoke.js"></script>
-<div id="container-e19879a3da347b315bf58c516fce91a0"></div> 
+<div id="container-e19879a3da347b315bf58c516fce91a0"></div>
 </body>
 </html>
