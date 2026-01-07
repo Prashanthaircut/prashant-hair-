@@ -3,84 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prashant Hair Salon | Official</title>
+    <title>Prashant Hair Salon - Best Stylist in Bhavnagar</title>
     
+    <link rel="icon" type="image/jpg" href="https://i.postimg.cc/T2gyYbjx/Screenshot-2026-01-04-15-01-24-41-680d03679600f7af0b4c700c6b270fe7.jpg">
+    <meta name="description" content="Prashant Hair Salon: Premium grooming studio in Bhavnagar. Book online and see our latest styles!">
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --gold: #d4af37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.08); }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; user-select: none; }
-
-        #noticeBar { display:none; background: var(--gold); color: #000; padding: 10px; font-weight: bold; position: sticky; top:0; z-index: 1000; text-align: center; font-size: 14px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; user-select: none; text-align: center; }
         
-        #shopStatusDisplay { display: none; padding: 8px; font-size: 12px; font-weight: bold; text-align: center; }
-        .open { background: #28a745; }
-        .closed { background: #e74c3c; }
+        #noticeBar { display:none; background: var(--gold); color: #000; padding: 10px; font-weight: bold; position: sticky; top:0; z-index: 1000; }
+        #shopStatusDisplay { display: none; padding: 10px; font-weight: bold; }
+        .open { background: #28a745; } .closed { background: #e74c3c; }
 
-        header { padding: 20px 10px; text-align: center; background: #000; border-bottom: 2px solid var(--gold); }
-        .main-logo { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 8px; object-fit: cover; }
-        header h1 { font-size: 20px; margin: 0; letter-spacing: 1px; }
+        header { padding: 30px 10px; background: #000; border-bottom: 2px solid var(--gold); }
+        .main-logo { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
 
-        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
-        .gallery-item { background: #161616; border-radius: 10px; overflow: hidden; border: 1px solid #333; cursor: pointer; }
-        .gallery-item img { width: 100%; height: 130px; object-fit: cover; }
+        /* Photo Grid */
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .gallery-item { background: #161616; border-radius: 12px; overflow: hidden; border: 1px solid #333; cursor: zoom-in; }
+        .gallery-item img { width: 100%; height: 140px; object-fit: cover; }
+        .price-tag { color: var(--gold); font-weight: bold; padding: 8px; display: block; }
 
-        #imgModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        #imgModal img { max-width: 90%; max-height: 80%; border-radius: 10px; border: 2px solid var(--gold); }
+        /* Zoom Overlay Style */
+        #zoomOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        #zoomOverlay img { max-width: 90%; max-height: 80%; border: 2px solid var(--gold); border-radius: 10px; }
+        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
 
-        .card { background: var(--glass); backdrop-filter: blur(10px); padding: 25px; margin: 15px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #111; color: #fff; border: 1px solid #333; box-sizing: border-box; }
-        .btn-gold { background: var(--gold); color: #000; padding: 15px; border: none; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .card { background: var(--glass); padding: 25px; margin: 20px 15px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #111; color: #fff; border: 1px solid #333; box-sizing: border-box; }
+        .btn-gold { background: var(--gold); color: #000; padding: 15px; width: 100%; font-weight: bold; border-radius: 8px; border:none; }
 
-        footer { padding: 25px 15px; text-align: center; border-top: 1px solid #222; margin-bottom: 70px; }
-        .social-links a { color: var(--gold); font-size: 24px; margin: 0 12px; text-decoration: none; }
+        .social-grid { display: flex; justify-content: center; gap: 20px; padding: 30px; background: #000; }
+        .social-icon { font-size: 32px; text-decoration: none; }
+        .fa-instagram { color: #E1306C; } .fa-whatsapp { color: #25D366; }
+        footer { padding: 20px; font-size: 11px; color: #555; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<div id="noticeBar"><i class="fas fa-bell"></i> <span id="noticeText"></span></div>
+<div id="noticeBar"><i class="fas fa-bullhorn"></i> <span id="noticeText"></span></div>
 <div id="shopStatusDisplay"></div>
+
+<div id="zoomOverlay" onclick="closeImage()">
+    <span class="close-zoom">&times;</span>
+    <img id="zoomedImg" src="">
+</div>
 
 <header>
     <img src="https://i.postimg.cc/T2gyYbjx/Screenshot-2026-01-04-15-01-24-41-680d03679600f7af0b4c700c6b270fe7.jpg" alt="Logo" class="main-logo">
     <h1>PRASHANT <span style="color:var(--gold)">SALON</span></h1>
 </header>
 
-<div style="text-align: center; margin: 15px 0;">
-    <div id="container-e19879a3da347b749666c8916361a4b4"></div>
-</div>
-
+<h3 style="color:var(--gold); margin-top: 30px;">STYLES & PRICES</h3>
 <div id="galleryDisplay" class="gallery-grid"></div>
 
-<div id="imgModal" onclick="this.style.display='none'">
-    <img id="fullImg" src="">
-    <p style="color:var(--gold); margin-top:15px;">Tap to close</p>
-</div>
-
 <div class="card">
-    <h3 style="color:var(--gold); text-align:center; margin-top:0;">BOOK APPOINTMENT</h3>
+    <h3 style="color:var(--gold);">BOOK APPOINTMENT</h3>
     <input type="text" id="cName" placeholder="Aapka Naam">
     <input type="tel" id="cPhone" placeholder="Mobile Number">
     <input type="datetime-local" id="cTime">
-    <textarea id="cNote" placeholder="Style details/Description..." rows="2"></textarea>
+    <textarea id="cNote" placeholder="Haircut details..." rows="2"></textarea>
     <button class="btn-gold" onclick="secureBooking()">Confirm Booking</button>
 </div>
 
-<footer>
-    <div class="social-links" id="socialFooter"></div>
-    <p style="font-size: 10px; color: #555; margin-top: 15px;">PRASHANT HAIR SALON © 2026</p>
-</footer>
+<div class="social-grid">
+    <a href="https://www.instagram.com/prashant_haircut/" class="social-icon" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://wa.me/918460592336" class="social-icon" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <a href="#" id="ytLink" class="social-icon" target="_blank"><i class="fab fa-youtube"></i></a>
+    <a href="#" id="tgLink" class="social-icon" target="_blank"><i class="fab fa-telegram"></i></a>
+</div>
 
-<script type='text/javascript' src='//pl25446059.profitablecpmrate.com/6e/02/7e/6e027e025f162a8c381c8282f64a4b41.js'></script>
+<footer>PRASHANT HAIR SALON © 2026</footer>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com/" };
+    const firebaseConfig = { databaseURL: "https://prashant-haircut-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function loadData() {
+        // Shop Status
         db.ref('shopStatus').on('value', snap => {
             const s = snap.val() || "Open";
             const el = document.getElementById('shopStatusDisplay');
@@ -89,52 +95,52 @@
             el.className = s === "Open" ? "open" : "closed";
         });
 
-        db.ref('announcement').on('value', snap => {
-            const msg = snap.val();
-            const bar = document.getElementById('noticeBar');
-            if(msg && msg.trim() !== "") { 
-                bar.style.display = 'block'; 
-                document.getElementById('noticeText').innerText = msg; 
-            } else { bar.style.display = 'none'; }
-        });
-
+        // Photos with Zoom Trigger
         db.ref('photos').on('value', snap => {
             const data = snap.val();
             const div = document.getElementById('galleryDisplay');
             div.innerHTML = '';
-            for (let id in data) {
-                div.innerHTML += `<div class="gallery-item" onclick="openImg('${data[id].url}')"><img src="${data[id].url}"><div style="padding:8px; font-size:11px;"><b>${data[id].title}</b><br><span style="color:var(--gold)">₹${data[id].price}</span></div></div>`;
+            if (data) {
+                for (let id in data) {
+                    div.innerHTML += `
+                    <div class="gallery-item" onclick="zoomImage('${data[id].url}')">
+                        <img src="${data[id].url}">
+                        <div style="padding:10px;">
+                            <span style="font-size:14px; display:block;">${data[id].title}</span>
+                            <span class="price-tag">₹${data[id].price}</span>
+                        </div>
+                    </div>`;
+                }
             }
         });
 
-        db.ref('social').on('value', snap => {
-            const s = snap.val();
-            if(s) {
-                document.getElementById('socialFooter').innerHTML = `
-                    <a href="${s.tg}" target="_blank"><i class="fab fa-telegram"></i></a>
-                    <a href="${s.ig}" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://wa.me/${s.wa}" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+        db.ref('announcement').on('value', snap => {
+            const msg = snap.val();
+            if(msg) { 
+                document.getElementById('noticeBar').style.display = 'block'; 
+                document.getElementById('noticeText').innerText = msg; 
             }
         });
     }
 
-    function openImg(url) {
-        document.getElementById('fullImg').src = url;
-        document.getElementById('imgModal').style.display = 'flex';
+    // Zoom Functions
+    function zoomImage(url) {
+        document.getElementById('zoomedImg').src = url;
+        document.getElementById('zoomOverlay').style.display = 'flex';
+    }
+    function closeImage() {
+        document.getElementById('zoomOverlay').style.display = 'none';
     }
 
     function secureBooking() {
         const name = document.getElementById('cName').value.trim();
         const phone = document.getElementById('cPhone').value.trim();
         const time = document.getElementById('cTime').value;
-        const note = document.getElementById('cNote').value;
-        if(name.length < 3 || phone.length !== 10 || !time) { alert("Naam, Number aur Time sahi dale!"); return; }
-        db.ref('bookings').push({ name, phone, time, note, submittedAt: Date.now() }).then(() => { alert("✅ Booking Done!"); });
+        if(name.length < 3 || phone.length !== 10 || !time) { alert("Details sahi dalo!"); return; }
+        db.ref('bookings').push({ name, phone, time, note: document.getElementById('cNote').value, submittedAt: Date.now() }).then(() => { alert("✅ Booking Success!"); });
     }
     window.onload = loadData;
 </script>
-
-<script async="async" data-cfasync="false" src="//pl25446077.profitablecpmrate.com/e19879a3da347b749666c8916361a4b4/invoke.js"></script>
 <script async="async" data-cfasync="false" src="https://pl28406257.effectivegatecpm.com/e19879a3da347b315bf58c516fce91a0/invoke.js"></script>
 <div id="container-e19879a3da347b315bf58c516fce91a0"></div>
 </body>
